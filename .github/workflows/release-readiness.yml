@@ -1,0 +1,30 @@
+# PROD caller — goes to BHoM/CI_Toolkit_Proxy at .github/workflows/release-readiness.yml
+# Public host, scope=bhom (OSS). Reviewable draft; not yet pushed.
+name: Release Readiness (BHoM)
+
+on:
+  # Weekly Monday 04:00 UTC (spec cadence). Keep commented until the reshape
+  # cutover so the Admin scope=both dispatch stays the single source during
+  # transition; uncomment at go-live.
+  # schedule:
+  #   - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Resolve + render only; no build.
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-readiness-bhom
+  cancel-in-progress: false
+
+jobs:
+  run:
+    uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/workflows/release-readiness-cross-build.yml@develop
+    with:
+      scope:   bhom
+      dry_run: ${{ inputs.dry_run || false }}
+    secrets:
+      BHOM_APP_ID:          ${{ secrets.BHOM_APP_ID }}
+      BHOM_APP_PRIVATE_KEY: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
