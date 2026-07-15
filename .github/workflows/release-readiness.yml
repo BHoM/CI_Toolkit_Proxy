@@ -6,8 +6,8 @@ on:
   # Weekly Monday 04:00 UTC (spec cadence). Keep commented until the reshape
   # cutover so the Admin scope=both dispatch stays the single source during
   # transition; uncomment at go-live.
-  # schedule:
-  #   - cron: '0 4 * * 1'
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       dry_run:
