@@ -5,9 +5,39 @@
 name: Release Readiness (BHoM)
 
 on:
-  # Weekly Monday 04:00 UTC (spec cadence).
-  schedule:
-    - cron: '0 4 * * 1'
+  # SCHEDULE DISABLED 2026-08-10, pending a decision on whether this workflow is kept.
+  #
+  # Evidence: over five runs (2026-07-17 to 08-10) the compile dimension produced no
+  # genuine coupling finding. The same legs failed every week (19 of 38 on BHE,
+  # unchanged) and the cause was environmental, not coupling: dependencies fail at
+  # their own release tags with MSB3822/MSB3823, the old-style-.csproj-with-binary-
+  # resources failure under SDK `dotnet build`. BHoMBot's nightly alpha builds the
+  # same repos green because it uses full MSBuild (BuildSolution.cs:56 via
+  # BuilderPath.cs). The CS0234/CS0246 errors in dependent legs are cascades from
+  # that, not findings. The versioning legs were separately 100% misattributed (see
+  # CI_Toolkit#150). Neither rolling issue was ever read: 0 comments, 0 assignees in
+  # 24 days.
+  #
+  # The deeper problem is that the question this workflow asks has no referent in the
+  # current release model. It asks whether a subject can be released against the
+  # shipped cohort. Measured across 10 BHoM repos: every repo sits at the same tag
+  # (v9.2.beta.0), tagged in one ceremony, and across 18-31 tags per repo there has
+  # never been a patch release. The fleet ships as one MSI built from those tags
+  # (BuildBeta.cs:49). There is no independent per-repo release to block, which is
+  # also why BHoMBot's beta-installer / beta-versioning never went red: 142
+  # observations across 14 repos over five quarterly cycles, zero non-success.
+  #
+  # REVERSAL TRIGGER: a beta tag whose patch component is not .0 (e.g. v9.2.beta.1).
+  # That would mean the release model has become independent or patch-based, the
+  # coupling question would acquire a real consumer, and this workflow is the right
+  # shape for it. Re-enable then, but fix CI_Toolkit#150 (attribution) and the
+  # MSBuild toolchain first, or every leg stays red for reasons unrelated to coupling.
+  #
+  # Nothing deleted: workflow, caller and rolling issue all retained pending that
+  # decision. workflow_dispatch below still works for on-demand runs.
+  #
+  # schedule:
+  #   - cron: '0 4 * * 1'   # was: weekly Monday 04:00 UTC
   workflow_dispatch:
     inputs:
       dry_run:
