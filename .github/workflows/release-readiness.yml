@@ -18,23 +18,39 @@ on:
   # CI_Toolkit#150). Neither rolling issue was ever read: 0 comments, 0 assignees in
   # 24 days.
   #
-  # The deeper problem is that the question this workflow asks has no referent in the
-  # current release model. It asks whether a subject can be released against the
-  # shipped cohort. Measured across 10 BHoM repos: every repo sits at the same tag
-  # (v9.2.beta.0), tagged in one ceremony, and across 18-31 tags per repo there has
-  # never been a patch release. The fleet ships as one MSI built from those tags
-  # (BuildBeta.cs:49). There is no independent per-repo release to block, which is
-  # also why BHoMBot's beta-installer / beta-versioning never went red: 142
-  # observations across 14 repos over five quarterly cycles, zero non-success.
+  # The question this workflow asks has a referent, but a very rare one. It asks
+  # whether a subject can be released against the shipped cohort. Swept 2026-08-11
+  # across all 80 beta repos in both orgs, 1,562 tags: exactly four carry a non-.0
+  # patch component, and only one is recent.
   #
-  # REVERSAL TRIGGER: a beta tag whose patch component is not .0 (e.g. v9.2.beta.1).
-  # That would mean the release model has become independent or patch-based, the
-  # coupling question would acquire a real consumer, and this workflow is the right
-  # shape for it. Re-enable then, but fix CI_Toolkit#150 (attribution) and the
+  #   BHoM/ETABS_Toolkit             v2.4.beta.1   2019-10-04
+  #   BHoM/BHoM_UI                   v3.2.beta.1   2020-06-30
+  #   BHoM/Grasshopper_UI            v4.1.beta.1   2021-03-30
+  #   BHE/Revit_Documentation_Tool   v7.0.beta.1   2024-01-08
+  #
+  # Every repo currently sits at v9.2.beta.0, tagged in one ceremony, and the fleet
+  # ships as one MSI built from those tags (BuildBeta.cs:49), which is why BHoMBot's
+  # beta-installer / beta-versioning never went red: 142 observations across 14 repos
+  # over five quarterly cycles, zero non-success.
+  #
+  # CORRECTION 2026-08-11: an earlier version of this note claimed there had never
+  # been a patch release, measured on 10 BHoM repos only. The sweep above disproves
+  # it. The decision below rests on rarity and zero yield, not on the absence of a
+  # referent.
+  #
+  # DEPRECATED 2026-08-11. The schedule is the only trigger that ever fired it and it
+  # is disabled, so this workflow no longer runs on its own. Nothing is deleted:
+  # workflow, caller and rolling issues are retained as a record. CI_Toolkit#150 and
+  # #153 are closed as moot, since they only ever gated a re-enable.
+  #
+  # REVIVAL TRIGGER: a NEW non-.0 beta tag cut after 2026-08-11. The four above are
+  # historical and do not count; the trigger is that the release model becomes
+  # patch-based again, not that it ever was. Revive then, but fix the attribution
+  # defect (whole-closure instead of subject-scoped, see CI_Toolkit#150) and the
   # MSBuild toolchain first, or every leg stays red for reasons unrelated to coupling.
   #
-  # Nothing deleted: workflow, caller and rolling issue all retained pending that
-  # decision. workflow_dispatch below still works for on-demand runs.
+  # workflow_dispatch below still works, but a manual run currently returns
+  # Error/~443 from the attribution defect above, not a coupling answer.
   #
   # schedule:
   #   - cron: '0 4 * * 1'   # was: weekly Monday 04:00 UTC
