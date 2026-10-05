@@ -1,8 +1,14 @@
-# Beta-tier proxy, BHoM variant. Bundles the tier's checks plus
-# copyright-compliance (BHoM enforces OSS copyright; the BHE variant omits it).
-# Copy to .github/workflows/ci-beta.yml in each BHoM beta repo.
-# Runs on pull_request, non-blocking until a ruleset requires its checks.
-# Workflow name CI keeps check contexts bare: required contexts are the job names.
+# Beta-tier required workflow, BHoM variant. Sourced by the organisation ruleset's
+# `workflows` rule; it is not copied into consuming repositories.
+#
+# Carries the compliance and build checks only. ci-serialisation and
+# ci-versioning are deliberately absent while they are reworked, and remain in
+# each repository's own ci-<tier>.yml so they keep running non-blocking.
+# ci-dataset-compliance and ci-dataset-tests are absent because both fail on
+# untouched input and must not gate a merge.
+#
+# Job names are the check contexts. Keep the ci- prefix: the bare names collide
+# with BHoMBot's required contexts on repositories whose protection is unpinned.
 
 name: CI
 
@@ -16,17 +22,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  ci-build:
     runs-on: windows-2025-vs2026
     timeout-minutes: 30
     steps:
       - name: Run build
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-build@develop
+        uses: BHoM/CI_Toolkit/.github/actions/ci-build@develop
         with:
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
 
-  code-compliance:
+  ci-code-compliance:
     runs-on: windows-2025-vs2026
     timeout-minutes: 20
     permissions:
@@ -35,14 +41,14 @@ jobs:
       actions: write
     steps:
       - name: Run code compliance
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
+        uses: BHoM/CI_Toolkit/.github/actions/ci-compliance@develop
         with:
           check_type: code
           patterns: '*.cs'
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
 
-  copyright-compliance:
+  ci-copyright-compliance:
     runs-on: windows-2025-vs2026
     timeout-minutes: 20
     permissions:
@@ -51,30 +57,14 @@ jobs:
       actions: write
     steps:
       - name: Run copyright compliance
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
+        uses: BHoM/CI_Toolkit/.github/actions/ci-compliance@develop
         with:
           check_type: copyright
           patterns: '*.cs'
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
 
-  dataset-compliance:
-    runs-on: windows-2025-vs2026
-    timeout-minutes: 20
-    permissions:
-      contents: read
-      pull-requests: read
-      actions: write
-    steps:
-      - name: Run dataset compliance
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
-        with:
-          check_type: dataset
-          patterns: '**/*[Dd]atasets*/**/*.json **/*[Dd]atasets*.json'
-          app_id: ${{ secrets.BHOM_APP_ID }}
-          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
-
-  documentation-compliance:
+  ci-documentation-compliance:
     runs-on: windows-2025-vs2026
     timeout-minutes: 20
     permissions:
@@ -83,14 +73,14 @@ jobs:
       actions: write
     steps:
       - name: Run documentation compliance
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
+        uses: BHoM/CI_Toolkit/.github/actions/ci-compliance@develop
         with:
           check_type: documentation
           patterns: '*.cs'
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
 
-  project-compliance:
+  ci-project-compliance:
     runs-on: windows-2025-vs2026
     timeout-minutes: 20
     permissions:
@@ -99,40 +89,9 @@ jobs:
       actions: write
     steps:
       - name: Run project compliance
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-compliance@develop
+        uses: BHoM/CI_Toolkit/.github/actions/ci-compliance@develop
         with:
           check_type: project
-          patterns: 'AssemblyInfo.cs *.csproj'
-          app_id: ${{ secrets.BHOM_APP_ID }}
-          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
-
-  dataset-tests:
-    runs-on: windows-2025-vs2026
-    timeout-minutes: 30
-    steps:
-      - name: Run dataset tests
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-dataset-tests@develop
-        with:
-          app_id: ${{ secrets.BHOM_APP_ID }}
-          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
-
-  serialisation:
-    runs-on: windows-2025-vs2026
-    timeout-minutes: 90
-    steps:
-      - name: Run serialisation
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-serialisation@develop
-        with:
-          app_id: ${{ secrets.BHOM_APP_ID }}
-          private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
-          base_ref: ${{ github.base_ref }}
-
-  versioning:
-    runs-on: windows-2025-vs2026
-    timeout-minutes: 90
-    steps:
-      - name: Run versioning
-        uses: BuroHappoldEngineeringAdmin/CI_Toolkit/.github/actions/ci-versioning@develop
-        with:
+          patterns: '*AssemblyInfo.cs *.csproj'
           app_id: ${{ secrets.BHOM_APP_ID }}
           private_key: ${{ secrets.BHOM_APP_PRIVATE_KEY }}
